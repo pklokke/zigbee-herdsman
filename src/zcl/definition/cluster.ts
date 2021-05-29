@@ -2292,6 +2292,7 @@ const Cluster: {
             lampBurnHours: {ID: 51, type: DataType.uint24},
             lampAlarmMode: {ID: 52, type: DataType.bitmap8},
             lampBurnHoursTripPoint: {ID: 53, type: DataType.uint24},
+            schneiderDimmingMode: {ID: 0xe000, type: DataType.enum8, manufacturerCode: ManufacturerCode.SCHNEIDER},
         },
         commands: {
         },
