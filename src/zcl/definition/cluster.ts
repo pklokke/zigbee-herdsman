@@ -1217,10 +1217,10 @@ const Cluster: {
                 parameters: [
                     {name: 'options', type: DataType.uint24},
                     {name: 'srcID', type: DataType.uint32},
-                    {name: 'sinkGroupID', type: DataType.uint16},
-                    {name: 'deviceID', type: DataType.uint8},
-                    {name: 'frameCounter', type: DataType.uint32},
-                    {name: 'gpdKey', type: BuffaloZclDataType.LIST_UINT8},
+                    /*{name: 'sinkGroupID', type: DataType.uint16},*/
+                    /*{name: 'deviceID', type: DataType.uint8},*/
+                    /*{name: 'frameCounter', type: DataType.uint32},
+                    {name: 'gpdKey', type: BuffaloZclDataType.LIST_UINT8},*/
                 ],
             },
             commisioningMode: {

@@ -48,7 +48,7 @@ class GreenPower extends events.EventEmitter {
             );
 
             const payload = {
-                options: 0x00e548,
+                options: 0x002550,
                 srcID: dataPayload.frame.Payload.srcID,
                 sinkGroupID: this.adapter.greenPowerGroup,
                 deviceID: dataPayload.frame.Payload.commandFrame.deviceID,
