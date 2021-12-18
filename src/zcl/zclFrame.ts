@@ -4,6 +4,13 @@ import BuffaloZcl from './buffaloZcl';
 import {TsType as BuffaloTsType} from '../buffalo';
 import * as TsType from './tstype';
 import {TsType as DefinitionTsType, FrameType} from './definition';
+import Debug from "debug";
+
+const debug = {
+    error: Debug('zigbee-herdsman:adapter:ezsp:driver:error'),
+    log: Debug('zigbee-herdsman:adapter:ezsp:driver'),
+};
+
 
 const MINIMAL_FRAME_LENGTH = 3;
 
@@ -227,6 +234,10 @@ class ZclFrame {
         for (const parameter of command.parameters) {
             const options: BuffaloTsType.Options = {payload};
 
+            if (!this.conditionsValid(parameter, payload, buffalo.getBuffer().length - buffalo.getPosition())) {
+                continue;
+            }
+
             if (ListTypes.includes(parameter.type)) {
                 const lengthParameter = command.parameters[command.parameters.indexOf(parameter) - 1];
                 const length = payload[lengthParameter.name];
@@ -338,6 +349,11 @@ class ZclFrame {
                     return entry.status === condition.value;
                 } else if (condition.type == 'directionEquals') {
                     return entry.direction !== condition.value;
+                } else if(condition.type == 'bitMaskSet') {
+                    debug.log(`condition.param: ${condition.param} entry[condition.param]: ${entry[condition.param]} condition.mask: ${condition.mask}` );
+                    return (entry[condition.param] & condition.mask) !== condition.mask;
+                } else if(condition.type == 'bitFieldEnum') {
+                    return ((entry[condition.param] >> condition.offset) & ((1<<condition.size)-1)) !== condition.value;
                 } else if (remainingBufferBytes != null && condition.type == 'minimumRemainingBufferBytes') {
                     return remainingBufferBytes < condition.value;
                 } else  {
