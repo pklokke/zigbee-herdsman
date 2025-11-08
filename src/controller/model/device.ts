@@ -359,14 +359,35 @@ export class Device extends Entity<ControllerEventMap> {
 
             if (frame.cluster.name in attributes) {
                 const response: KeyValue = {};
+                console.log(`[HERDSMAN_DEBUG] Read request for cluster ${frame.cluster.name}, attrs:`, JSON.stringify(attributes[frame.cluster.name].attributes));
 
                 for (const entry of frame.payload) {
+                    console.log(`[HERDSMAN_DEBUG] Processing attrId ${entry.attrId}`);
                     const name = frame.cluster.getAttribute(entry.attrId)?.name;
 
                     if (name && name in attributes[frame.cluster.name].attributes) {
+                        console.log(`[HERDSMAN_DEBUG] Named attr ${name}:`, JSON.stringify(attributes[frame.cluster.name].attributes[name]));
                         response[name] = attributes[frame.cluster.name].attributes[name];
+                    } else if (entry.attrId in attributes[frame.cluster.name].attributes) {
+                        // Handle numeric attribute IDs (custom manufacturer attributes)
+                        const cachedValue = attributes[frame.cluster.name].attributes[entry.attrId];
+                        console.log(`[HERDSMAN_DEBUG] Found cached attr ${entry.attrId}:`, JSON.stringify(cachedValue));
+
+                        // Skip sending response for plain numeric values that would cause ZCL encoding errors
+                        // Let the application-level converters handle these attributes properly
+                        if (typeof cachedValue === 'object' && cachedValue && 'value' in cachedValue && 'type' in cachedValue) {
+                            // Only include properly structured attributes with value and type
+                            response[entry.attrId] = cachedValue;
+                            console.log(`[HERDSMAN_DEBUG] Including structured attr ${entry.attrId} in response`);
+                        } else {
+                            console.log(`[HERDSMAN_DEBUG] Skipping plain value for attr ${entry.attrId} - letting converter handle it`);
+                        }
+                    } else {
+                        console.log(`[HERDSMAN_DEBUG] No cached value for attrId ${entry.attrId}`);
                     }
                 }
+
+                console.log(`[HERDSMAN_DEBUG] Final response:`, JSON.stringify(response));
 
                 try {
                     await endpoint.readResponse(frame.cluster.ID, frame.header.transactionSequenceNumber, response, {
