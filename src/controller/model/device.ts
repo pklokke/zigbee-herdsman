@@ -356,6 +356,20 @@ export class Device extends Entity<ControllerEventMap> {
 
                     if (name && name in attributes[frame.cluster.name].attributes) {
                         response[name] = attributes[frame.cluster.name].attributes[name];
+                    } else if (entry.attrId in attributes[frame.cluster.name].attributes) {
+                        // Handle numeric attribute IDs (custom manufacturer attributes)
+                        const cachedValue = attributes[frame.cluster.name].attributes[entry.attrId];
+
+                        // Only include structured attributes with value and type properties
+                        // Skip plain values that would cause ZCL encoding errors
+                        if (
+                            typeof cachedValue === "object" &&
+                            cachedValue !== null &&
+                            "value" in cachedValue &&
+                            "type" in cachedValue
+                        ) {
+                            response[entry.attrId] = cachedValue;
+                        }
                     }
                 }
 
